@@ -8,8 +8,9 @@ class SigmoidNeuron(Neuron):
         super().__init__(weights)
         self.activation = 0
 
-    def calculate_activation(self ):
-        self.activation =  1.0 / (1.0 + math.exp(-sum(self.weights)))
+    def calculate_activation(self):
+        if self.weights:
+            self.activation = 1.0 / (1.0 + math.exp(-sum(self.weights)))
 
 
 def main():
@@ -19,5 +20,5 @@ def main():
     print(neuron.activation)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
