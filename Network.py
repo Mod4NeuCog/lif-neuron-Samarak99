@@ -115,3 +115,37 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+## Fulfilling all layers
+
+# Layer 0 :
+# sending a vector of inputs. I expect as output same a vector (collecting O1... Os get 1 or 0 vectors)
+# my variables a vector of boolean vectors
+
+# Layer 1 & 2:
+# we have the notion of time : at everytime step I have an input and output. Different notion of time. one is logical it takes every layer
+# when we want to compare to brain we don't have a series a computation. So to map the series of computation I would expect that the output is not exactly at the first time.
+# model is the raw data, the output of this feed forward. it is a vector
+# behavior is the relation one input I can have 2 different outputs. Function should be that now I know that I have 2 diff states, there should be a difference according to the initial state
+
+# Layer 3 : State Transition
+# One State you get a vector of variable . you define a state as a vector of values of these variables
+# What is the variable of each neuron. for each neuron we have a membrane potential as variables.
+# On a network level we get an output or not
+
+# Layer 4 : Network Level
+# connectivity : which neurons are connected .How they are connected
+# each of a neuron is a system, and how they are connected can be according to the index/name.
+# So 2 things : components and how they are connected.
+
+# EF: Experimental Framework
+# mouse : active duration : is it matching the activity duration of the network
+# what to want to observe as an output of the network and EF:
+# If the action time fits the duration of activty of the network. So we want to the output to be yes or no (acceptor result).
+# and now the EF : has many components, and is connected to each other. we have a generator and can be embedded to the acceptor or no. we have the raw input.
+# Input, translate transuse, then the acceptor is comparing.
+# agreement with you experiment frame to your model - so at some point we can have multiple classes, models ...
+
+# input output system we call it a component
+
