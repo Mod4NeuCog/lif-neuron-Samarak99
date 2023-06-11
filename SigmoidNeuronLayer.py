@@ -5,6 +5,7 @@ class SigmoidNeuronLayer:
     def __init__(self, num_neurons, weights):
         self.neurons = []
         self.activations_per_layer = []
+        self.fired_neurons_count = 0
 
         for i in range(num_neurons):
 

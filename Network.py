@@ -1,6 +1,10 @@
+import time
+import matplotlib.pyplot as plt
+
 from SigmoidNeuron import SigmoidNeuron
 from SigmoidNeuronLayer import SigmoidNeuronLayer
 from IFLayer import IFLayer
+
 
 
 class Network:
@@ -16,17 +20,29 @@ class Network:
         self.neurons_per_layer = neurons_per_layer
         self.layers = []
         self.threshold = threshold
+        self.start_time = time.time() # track how many time it took for the whole network
+        self.end_time = None
+        self.duration = None
+        self.fired_neurons_count = 0
+        self.activation_input = activation_input
+        self.initially_active_neuron = sum(neuron == 1 for neuron in self.activation_input)
+        self.activity = [] # we will save the number of neurons saved at each time
 
     # this function get the output of the neurons in the last array, and the one with higher output wins
     def winner_take_all(self):
+        print('total')
+        print(self.activity)
+
         for i in range(0 , self.num_layers):
             #Create the first layer but without appending the activations because this is intiliaze at the beginning
             if i == 0:
+                num_fired_neurons = self.initially_active_neuron
                 ## if there is a threshold it means I want to create an integrate and fire Layer not sigmoid
                 if len(self.threshold) > 0:
-                    layer = IFLayer(self.neurons_per_layer[i], False, self.threshold[i])
+                    layer = IFLayer(self.neurons_per_layer[i], False, self.threshold[i] , self.initially_active_neuron , self.start_time)
                 else:
                     layer = SigmoidNeuronLayer(self.neurons_per_layer[i], False)
+                self.track_activity(num_fired_neurons)
             else:
                 weights_per_layer = []
                 # Step 1 : if not first layer I need to get the updated matrix of weights to Pass to layer
@@ -52,28 +68,71 @@ class Network:
                 # Step 2 : Create the layer and pass the updated weights
                 ## if there is a threshold it means I want to create an integrate and fire Layer not sigmoid
                 if len(self.threshold) >0:
-                    layer = IFLayer(self.neurons_per_layer[i], weights_per_layer, self.threshold[i])
+                    layer = IFLayer(self.neurons_per_layer[i], weights_per_layer, self.threshold[i] , self.fired_neurons_count, self.start_time)
                 else:
                     layer = SigmoidNeuronLayer(self.neurons_per_layer[i], weights_per_layer)
 
+                num_fired_neurons = layer.fired_neurons_count
+
                 # append the activations in the layer in the matrix of the network :
                 self.activations.append(layer.activations_per_layer)
+
+                # append the activty of the layer to the network
+                self.activity = self.activity + layer.activity
+
+
+            # for each layer add how many neurons fired
+            self.fired_neurons_count = num_fired_neurons
 
             # Append each layer to the layers vector - This is just to store everything
             self.layers.append(layer)
 
         ## printing activation MAtrix
-        print('//////////////////////')
+        print('This Is our activation Matrix')
         print(self.activations)
         print('//////////////////////')
+
+        # Now the  network is done we save last ending time
+        self.end_time = time.time()
 
         # get last layer index and get max value index inside it
         last_activation_layer = self.activations[self.num_layers - 1]
         max_value_index = last_activation_layer.index(max(last_activation_layer))
         return max_value_index
 
+    def get_duration(self):
+        if self.end_time is None:
+            return None
+
+        return self.end_time - self.start_time
+
+    def track_activity(self , fired_nb):
+        duration = time.time() - self.start_time
+        self.activity.append((duration, fired_nb))
+
+    def plot_activity(self , index):
+        durations = [t[0] for t in self.activity]
+        spikes = [t[1] for t in self.activity]
+
+        plt.plot(durations, spikes)
+        plt.xlabel("Time (s)")
+        plt.ylabel("Total Activity")
+        title ="Total Activity of the Network over Time , Net: "+ str(index)
+        plt.title(title)
+        plt.show()
+
 
 def main():
+
+    # My parameters are the neurons per layers, how many layers, the weights , the threshold, the activation input.
+    # So in order to test my model activity and duration wrt to parameters, I am gonna create other values. and then compare it.
+    # For simplicity, going create a second network only with 2 neurons in 2 layers
+    neurons_per_layer_array = [[2, 3, 4], [2, 2]]
+    weights_array = []
+    activation_input_array = [[0, 1], [1, 1]]
+    threshold_array = []
+
+
     # how many layers and how many neuron in each layer
     neurons_per_layer = [2, 3, 4]
 
@@ -93,6 +152,15 @@ def main():
         [4, 3, 2, 1]
     ]
     weights.append(weights_layer23)
+    weights_array.append(weights)
+
+    weights_net2 = []
+    weights_layer12 = [
+        [0.5, 6],
+        [2, 3]
+    ]
+    weights_net2.append(weights_layer12)
+    weights_array.append(weights_net2)
 
     # Inputs here: I initialize the first input which will be for me here vector (y1, y2) and can be considered as
     # the pixels at init, so value between 0-1
@@ -106,11 +174,29 @@ def main():
         [1, 1.2],
         [1.2, 1.2, 1.0],
         [10, 1.5, 1.6, 1.2]]
+    threshold_array.append(threshold)
 
+    threshold_net2 = [
+        [1, 1],
+        [2, 10]]
+    threshold_array.append(threshold_net2)
 
-    network = Network(neurons_per_layer, weights , activation_input , threshold)
-    winner_neuron = network.winner_take_all()
-    print("Neuron " + str(winner_neuron+1) + " in the last layer ("+str(len(neurons_per_layer))+") is the Winner")
+    ## Now to test the network with different parameters, we loop according to our combination of parameters
+    for i in range(len(neurons_per_layer_array)):
+        network = Network(neurons_per_layer_array[i], weights_array[i], activation_input_array[i], threshold_array[i])
+        winner_neuron = network.winner_take_all()
+        print('Netowrk : ', i+1)
+        print("Neuron " + str(winner_neuron + 1) + " in the last layer (" + str(
+            len(neurons_per_layer)) + ") is the Winner")
+
+        print('//////////////////////')
+        print('This Is How many neuron fired')
+        print(network.fired_neurons_count)
+
+        print('//////////////////////')
+        print('This Is the activty of the network : (time, fired_neuron_count)')
+        network.plot_activity(i+1)
+
 
 
 if __name__ == "__main__":

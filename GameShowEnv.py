@@ -118,3 +118,10 @@ env = GameShowEnv()
 # gamma : disocunt factor : show the importance given to future rewards compared to immediate rewards.
 agent = Agent(alpha=0.5, gamma=0.9)
 agent.q_learning(env, episodes=1000)
+
+
+# Result
+# Each entry in the Q-table is represented as a key-value pair: (state, action): Q-value
+# The states are represented numerically, with 1 being the initial state (Q1), 2 as Q2, 3 as Q3, and 4 as Q4. 50000 represents the terminal state, which indicates winning the game.
+# The actions are represented as 0 and 1, where 0 corresponds to the action of giving up or quitting the game, and 1 corresponds to the action of proceeding to the next question.
+# The Q-values in the table represent the expected cumulative rewards associated with each state-action pair.
